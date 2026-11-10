@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma de Revisión de Estudiantes</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Importación de la fuente Lora desde Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background-color: #ffffff;
+            color: #1a1a1a;
+        }
+
+        /* Estilos limpios de tabla académica */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #ffffff;
+        }
+
+        th, td {
+            border: 1px solid #262626;
+            padding: 8px 14px;
+        }
+
+        th {
+            font-weight: 600;
+            border-bottom: 2px solid #1a1a1a;
+            background-color: #ffffff;
+        }
+
+        .turno-divider {
+            border-top: 2px solid #1a1a1a;
+        }
+
+        /* Filas alternas en gris suave para distinguir estudiantes */
+        tbody tr:nth-child(even) td:not(.turno-cell) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:nth-child(odd) td:not(.turno-cell) {
+            background-color: #ffffff;
+        }
+
+        /* Mantener siempre blanca la celda combinada de Turno */
+        .turno-cell {
+            background-color: #ffffff !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white p-4 sm:p-8 md:p-12">
+
+    <main class="max-w-4xl mx-auto">
+        <!-- Tabla de turnos sobre fondo blanco -->
+        <div class="overflow-x-auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="text-center w-48">Tandas</th>
+                        <th colspan="2" class="text-center">Estudiantes</th>
+                        <th class="text-center w-44">Horario de feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- TURNO 1: 8:20 a 9:24 -->
+                    <tr class="turno-divider">
+                        <td rowspan="8" class="turno-cell text-center align-middle font-medium">
+                            de 8:20 a 9:24
+                        </td>
+                        <td class="text-center w-32">20223775</td>
+                        <td class="text-center">Ruiz Godoy, Juan Diego</td>
+                        <td class="text-center">08:20 - 08:28</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20244467</td>
+                        <td class="text-center">Crisostomo Paucar, Aisha Ayleen</td>
+                        <td class="text-center">08:28 - 08:36</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20223633</td>
+                        <td class="text-center">Ballesteros Lara, Celeste Adriana</td>
+                        <td class="text-center">08:36 - 08:44</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20245639</td>
+                        <td class="text-center">Rosel Orbegoso, Arianna Lisseth</td>
+                        <td class="text-center">08:44 - 08:52</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20204166</td>
+                        <td class="text-center">Loli Noreña, Emily Yadira</td>
+                        <td class="text-center">08:52 - 09:00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20233293</td>
+                        <td class="text-center">Burga Tirado, Eddie Fabrizio</td>
+                        <td class="text-center">09:00 - 09:08</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20201962</td>
+                        <td class="text-center">Lopez Murga, Nicole Gabriela</td>
+                        <td class="text-center">09:08 - 09:16</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20241681</td>
+                        <td class="text-center">Sanchez Flores, Britany Elisa</td>
+                        <td class="text-center">09:16 - 09:24</td>
+                    </tr>
+
+                    <!-- TURNO 2: 9:34 a 10:38 -->
+                    <tr class="turno-divider">
+                        <td rowspan="8" class="turno-cell text-center align-middle font-medium">
+                            de 9:34 a 10:38
+                        </td>
+                        <td class="text-center">20241670</td>
+                        <td class="text-center">Ibañez Diaz, Vania Alejandra</td>
+                        <td class="text-center">09:34 - 09:42</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20241728</td>
+                        <td class="text-center">Gamonal Camposano, Denisse Liseth</td>
+                        <td class="text-center">09:42 - 09:50</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20245645</td>
+                        <td class="text-center">Gutierrez Ortiz, Ariana Mireya</td>
+                        <td class="text-center">09:50 - 09:58</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20241677</td>
+                        <td class="text-center">Palacios Tafur, Andrea Aracelly</td>
+                        <td class="text-center">09:58 - 10:06</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20233325</td>
+                        <td class="text-center">Ramos Anton, Eevee Celeste</td>
+                        <td class="text-center">10:06 - 10:14</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20240705</td>
+                        <td class="text-center">Machaca Sanomamani, Nathaly Nicolle</td>
+                        <td class="text-center">10:14 - 10:22</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20244471</td>
+                        <td class="text-center">Vallejos Matta, Daniela Sthefanie</td>
+                        <td class="text-center">10:22 - 10:30</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20244492</td>
+                        <td class="text-center">Bustamante Panduro, Ariana Nicole</td>
+                        <td class="text-center">10:30 - 10:38</td>
+                    </tr>
+
+                    <!-- TURNO 3: 10:48 a 11:44 -->
+                    <tr class="turno-divider">
+                        <td rowspan="7" class="turno-cell text-center align-middle font-medium">
+                            de 10:48 a 11:44
+                        </td>
+                        <td class="text-center">20233289</td>
+                        <td class="text-center">Chambilla Condori, Sandra Mariela</td>
+                        <td class="text-center">10:48 - 10:56</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20221530</td>
+                        <td class="text-center">Cataño Chavez, Fabiana</td>
+                        <td class="text-center">10:56 - 11:04</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20244486</td>
+                        <td class="text-center">Pelaez Vidal, Fabrizzio Marcelo</td>
+                        <td class="text-center">11:04 - 11:12</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20211610</td>
+                        <td class="text-center">Ugarte Ramos, Camila Julia</td>
+                        <td class="text-center">11:12 - 11:20</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20232610</td>
+                        <td class="text-center">Diaz Ayala, Joel Williams</td>
+                        <td class="text-center">11:20 - 11:28</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20244485</td>
+                        <td class="text-center">Cano Torre, Nelly Valeria</td>
+                        <td class="text-center">11:28 - 11:36</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20244515</td>
+                        <td class="text-center">Lopez Alvarez, Viviana Victoria</td>
+                        <td class="text-center">11:36 - 11:44</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+</html>
