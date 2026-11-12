@@ -53,15 +53,74 @@
         .turno-cell {
             background-color: #ffffff !important;
         }
+
+        /* Reloj en línea, a la izquierda del título y con su misma tipografía */
+        .reloj {
+            margin-right: 0.75em;
+            font-variant-numeric: tabular-nums lining-nums;
+        }
+
+        /* Contador de 8 minutos a la derecha del título: oculto hasta hacer clic en su zona */
+        .contador {
+            margin-left: 0.75em;
+            padding: 0;
+            border: 0;
+            background: none;
+            font: inherit;
+            font-size: 0.8em;
+            color: inherit;
+            cursor: pointer;
+            font-variant-numeric: tabular-nums lining-nums;
+        }
+
+        .contador span {
+            opacity: 0;
+        }
+
+        .contador.visible span {
+            opacity: 1;
+        }
+
+        .contador.inactivo {
+            color: #7a7a7a;
+        }
+
+        /* Turno pasado: gris completo, más oscuro que el de las filas alternas */
+        tbody tr.pasado td:not(.turno-cell) {
+            background-color: #cfcfcf;
+            color: #7a7a7a;
+        }
+
+        /* Turno activo: el verde y su vaciado se pintan por script en cada celda */
+        tbody tr.activo td:not(.turno-cell) {
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-white p-4 sm:p-8 md:p-12">
 
     <main class="max-w-4xl mx-auto">
+        <!-- Reloj con la hora actual del dispositivo -->
         <!-- Cabecera superior -->
         <h1 class="text-lg sm:text-xl font-semibold text-center mb-4">
+            <time id="reloj" class="reloj" role="timer" aria-label="Hora actual">--:--:--</time>
             Jueves 11 de noviembre de 2026 - Fotodiseño
+            <button type="button" id="contador" class="contador inactivo" aria-pressed="false" aria-label="Mostrar u ocultar el contador del turno"><span role="timer">--:--</span></button>
         </h1>
+        <script>
+            (function () {
+                var el = document.getElementById('reloj');
+                function dos(n) { return (n < 10 ? '0' : '') + n; }
+                function tick() {
+                    var d = new Date();
+                    el.textContent = dos(d.getHours()) + ':' + dos(d.getMinutes()) + ':' + dos(d.getSeconds());
+                    el.setAttribute('datetime', d.toISOString());
+                    // Reprograma alineado al cambio de segundo para que no se desfase
+                    setTimeout(tick, 1000 - d.getMilliseconds());
+                }
+                tick();
+            })();
+        </script>
 
         <!-- Tabla de turnos sobre fondo blanco -->
         <div class="overflow-x-auto">
@@ -208,6 +267,74 @@
             </table>
         </div>
     </main>
+
+    <script>
+        // Turno activo en verde claro que se vacía a gris de izquierda a derecha.
+        // Los horarios se leen de la última columna de cada fila ("HH:MM - HH:MM").
+        (function () {
+            var GRIS = '#cfcfcf', VERDE = '#d3efd0';
+            var filas = [];
+            var contador = document.getElementById('contador');
+            var contadorTexto = contador.querySelector('span');
+            function dos(n) { return (n < 10 ? '0' : '') + n; }
+            // El contador solo se ve tras hacer clic en su zona; otro clic lo oculta
+            contador.addEventListener('click', function () {
+                var visible = contador.classList.toggle('visible');
+                contador.setAttribute('aria-pressed', visible ? 'true' : 'false');
+            });
+            Array.prototype.forEach.call(document.querySelectorAll('tbody tr'), function (tr) {
+                var celdas = Array.prototype.filter.call(tr.cells, function (c) {
+                    return !c.classList.contains('turno-cell');
+                });
+                if (!celdas.length) return;
+                var m = celdas[celdas.length - 1].textContent.match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
+                if (!m) return;
+                filas.push({
+                    tr: tr,
+                    celdas: celdas,
+                    ini: (+m[1] * 60 + +m[2]) * 60,
+                    fin: (+m[3] * 60 + +m[4]) * 60
+                });
+            });
+
+            function pintar() {
+                var d = new Date();
+                var t = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000;
+                var resta = null;
+                filas.forEach(function (f) {
+                    var activo = t >= f.ini && t < f.fin;
+                    if (activo) resta = Math.ceil(f.fin - t);
+                    f.tr.classList.toggle('pasado', t >= f.fin);
+                    f.tr.classList.toggle('activo', activo);
+                    if (!activo) {
+                        f.celdas.forEach(function (c) { c.style.background = ''; });
+                        return;
+                    }
+                    // Punto de corte gris/verde medido sobre el ancho total de la fila,
+                    // repartido en el degradado de corte duro de cada celda.
+                    var frac = (t - f.ini) / (f.fin - f.ini);
+                    var izq = f.celdas[0].getBoundingClientRect().left;
+                    var der = f.celdas[f.celdas.length - 1].getBoundingClientRect().right;
+                    var x = izq + frac * (der - izq);
+                    f.celdas.forEach(function (c) {
+                        var r = c.getBoundingClientRect();
+                        var p = Math.max(0, Math.min(1, (x - r.left) / r.width)) * 100;
+                        c.style.background = 'linear-gradient(to right, ' + GRIS + ' ' + p.toFixed(2) + '%, ' + VERDE + ' ' + p.toFixed(2) + '%)';
+                    });
+                });
+                // Tiempo que le queda al turno en curso; "--:--" fuera de turno
+                contadorTexto.textContent = resta === null ? '--:--' : dos(Math.floor(resta / 60)) + ':' + dos(resta % 60);
+                contador.classList.toggle('inactivo', resta === null);
+            }
+
+            function ciclo() {
+                pintar();
+                setTimeout(ciclo, 1000 - new Date().getMilliseconds());
+            }
+            ciclo();
+            window.addEventListener('resize', pintar);
+        })();
+    </script>
 
 </body>
 </html>
