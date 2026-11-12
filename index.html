@@ -60,29 +60,41 @@
             font-variant-numeric: tabular-nums lining-nums;
         }
 
-        /* Contador de 8 minutos a la derecha del título: oculto hasta hacer clic en su zona */
-        .contador {
-            margin-left: 0.75em;
-            padding: 0;
-            border: 0;
-            background: none;
-            font: inherit;
-            font-size: 0.8em;
-            color: inherit;
-            cursor: pointer;
-            font-variant-numeric: tabular-nums lining-nums;
+        /* Banderita con la cuenta atrás, a la altura de la fila del turno activo.
+           El borde derecho de la tabla hace de asta. Se muestra/oculta con clic. */
+        main {
+            position: relative;
         }
 
-        .contador span {
+        .bandera {
+            position: absolute;
+            display: none;
+            height: 26px;
+            padding: 0 16px 0 8px;
+            border: 0;
+            background: #1a1a1a;
+            color: #ffffff;
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            line-height: 26px;
+            white-space: nowrap;
+            cursor: pointer;
+            font-variant-numeric: tabular-nums lining-nums;
+            clip-path: polygon(0 0, 100% 0, calc(100% - 8px) 50%, 100% 100%, 0 100%);
             opacity: 0;
         }
 
-        .contador.visible span {
+        .bandera.en-turno {
+            display: block;
+        }
+
+        .bandera.visible {
             opacity: 1;
         }
 
-        .contador.inactivo {
-            color: #7a7a7a;
+        tbody tr.activo td:not(.turno-cell) {
+            cursor: pointer;
         }
 
         /* Turno pasado: gris completo, más oscuro que el de las filas alternas */
@@ -105,7 +117,6 @@
         <h1 class="text-lg sm:text-xl font-semibold text-center mb-4">
             <time id="reloj" class="reloj" role="timer" aria-label="Hora actual">--:--:--</time>
             Jueves 11 de noviembre de 2026 - Fotodiseño
-            <button type="button" id="contador" class="contador inactivo" aria-pressed="false" aria-label="Mostrar u ocultar el contador del turno"><span role="timer">--:--</span></button>
         </h1>
         <script>
             (function () {
@@ -266,6 +277,9 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Banderita de cuenta atrás; el script la coloca junto a la fila activa -->
+        <button type="button" id="bandera" class="bandera" aria-pressed="false" aria-label="Mostrar u ocultar la cuenta atrás del turno"><span role="timer">08:00</span></button>
     </main>
 
     <script>
@@ -274,13 +288,19 @@
         (function () {
             var GRIS = '#cfcfcf', VERDE = '#d3efd0';
             var filas = [];
-            var contador = document.getElementById('contador');
-            var contadorTexto = contador.querySelector('span');
+            var bandera = document.getElementById('bandera');
+            var banderaTexto = bandera.querySelector('span');
+            var principal = document.querySelector('main');
             function dos(n) { return (n < 10 ? '0' : '') + n; }
-            // El contador solo se ve tras hacer clic en su zona; otro clic lo oculta
-            contador.addEventListener('click', function () {
-                var visible = contador.classList.toggle('visible');
-                contador.setAttribute('aria-pressed', visible ? 'true' : 'false');
+            // La cuenta atrás se muestra u oculta con clic en la banderita o en la fila activa
+            function alternar() {
+                var visible = bandera.classList.toggle('visible');
+                bandera.setAttribute('aria-pressed', visible ? 'true' : 'false');
+            }
+            bandera.addEventListener('click', alternar);
+            document.querySelector('tbody').addEventListener('click', function (e) {
+                var tr = e.target.closest('tr');
+                if (tr && tr.classList.contains('activo') && !e.target.closest('.turno-cell')) alternar();
             });
             Array.prototype.forEach.call(document.querySelectorAll('tbody tr'), function (tr) {
                 var celdas = Array.prototype.filter.call(tr.cells, function (c) {
@@ -300,10 +320,10 @@
             function pintar() {
                 var d = new Date();
                 var t = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000;
-                var resta = null;
+                var resta = null, filaActiva = null;
                 filas.forEach(function (f) {
                     var activo = t >= f.ini && t < f.fin;
-                    if (activo) resta = Math.ceil(f.fin - t);
+                    if (activo) { resta = Math.ceil(f.fin - t); filaActiva = f; }
                     f.tr.classList.toggle('pasado', t >= f.fin);
                     f.tr.classList.toggle('activo', activo);
                     if (!activo) {
@@ -322,9 +342,18 @@
                         c.style.background = 'linear-gradient(to right, ' + GRIS + ' ' + p.toFixed(2) + '%, ' + VERDE + ' ' + p.toFixed(2) + '%)';
                     });
                 });
-                // Tiempo que le queda al turno en curso; "--:--" fuera de turno
-                contadorTexto.textContent = resta === null ? '--:--' : dos(Math.floor(resta / 60)) + ':' + dos(resta % 60);
-                contador.classList.toggle('inactivo', resta === null);
+                // Banderita: tiempo que le queda al turno en curso, pegada a su fila
+                bandera.classList.toggle('en-turno', filaActiva !== null);
+                if (filaActiva !== null) {
+                    banderaTexto.textContent = dos(Math.floor(resta / 60)) + ':' + dos(resta % 60);
+                    var m = principal.getBoundingClientRect();
+                    var ult = filaActiva.celdas[filaActiva.celdas.length - 1].getBoundingClientRect();
+                    var ancho = bandera.offsetWidth, alto = bandera.offsetHeight;
+                    // Cuelga por fuera del borde derecho; si no hay sitio, se arrima al borde de la ventana
+                    var x = Math.min(ult.right, document.documentElement.clientWidth - ancho - 2);
+                    bandera.style.left = (x - m.left) + 'px';
+                    bandera.style.top = (ult.top - m.top + (ult.height - alto) / 2) + 'px';
+                }
             }
 
             function ciclo() {
